@@ -20,8 +20,8 @@ class AuthService {
 
       // Store user details in SharedPreferences
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('token', user.token);
-      await prefs.setString('role', user.role);
+      await prefs.setString('token', user.token!);
+      await prefs.setString('role', user.role!);
 
       return user;
     } else {

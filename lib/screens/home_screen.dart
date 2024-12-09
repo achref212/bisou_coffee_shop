@@ -1,211 +1,198 @@
 import 'package:flutter/material.dart';
-import '../models/product.dart';
-import '../widgets/product_card.dart';
-import 'GiftCardScreen.dart';
-import 'My_Orders.dart';
-import 'ProfileScreen.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _currentIndex = 0;
+  int selectedIndex = 0; // Navigation bar selected index
+  int selectedFilter = 0; // Filter selection index
 
-  final List<Widget> _screens = [
-    HomeContent(), // Main home content
-    MyOrdersScreen(),
-    GiftCardScreen(),
-    ProfileScreen(),
+  final List<Map<String, dynamic>> products = [
+    {
+      'name': 'Espresso',
+      'price': 2.99,
+      'imageUrl': 'https://via.placeholder.com/150/espresso',
+      'type': 'Recommendation',
+    },
+    {
+      'name': 'Cappuccino',
+      'price': 3.49,
+      'imageUrl': 'https://via.placeholder.com/150/cappuccino',
+      'type': 'Promo',
+    },
+    {
+      'name': 'Latte',
+      'price': 3.99,
+      'imageUrl': 'https://via.placeholder.com/150/latte',
+      'type': 'Best Sale',
+    },
+    {
+      'name': 'Mocha',
+      'price': 4.29,
+      'imageUrl': 'https://via.placeholder.com/150/mocha',
+      'type': 'All',
+    },
+    {
+      'name': 'Macchiato',
+      'price': 3.79,
+      'imageUrl': 'https://via.placeholder.com/150/macchiato',
+      'type': 'Promo',
+    },
+    {
+      'name': 'Americano',
+      'price': 2.89,
+      'imageUrl': 'https://via.placeholder.com/150/americano',
+      'type': 'Recommendation',
+    },
+  ];
+
+  final List<Map<String, String>> filters = [
+    {'name': 'All', 'value': 'All'},
+    {'name': 'Promo', 'value': 'Promo'},
+    {'name': 'Recommendations', 'value': 'Recommendation'},
+    {'name': 'Best Sale', 'value': 'Best Sale'},
+  ];
+
+  List<Map<String, dynamic>> get filteredProducts {
+    if (filters[selectedFilter]['value'] == 'All') {
+      return products;
+    }
+    return products
+        .where((product) => product['type'] == filters[selectedFilter]['value'])
+        .toList();
+  }
+
+  final List<Widget> screens = [
+    const Center(child: Text('Home Content')),
+    const Center(child: Text('Orders Content')),
+    const Center(child: Text('Gift Card Content')),
+    const Center(child: Text('Profile Content')),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFFC52127),
-        unselectedItemColor: Colors.grey,
-        currentIndex: _currentIndex,
-        type: BottomNavigationBarType.fixed,
-        showUnselectedLabels: true,
-        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold),
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.shopping_cart_outlined),
-            activeIcon: Icon(Icons.shopping_cart),
-            label: 'Orders',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.card_giftcard_outlined),
-            activeIcon: Icon(Icons.card_giftcard),
-            label: 'Gift Card',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person),
-            label: 'Profile',
+      body: selectedIndex == 0 ? buildHomePage() : screens[selectedIndex],
+      bottomNavigationBar: buildNavigationBar(),
+    );
+  }
+
+  /// Animated Bottom Navigation Bar
+  Widget buildNavigationBar() {
+    return AnimatedContainer(
+      height: 70.0,
+      duration: const Duration(milliseconds: 400),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(20.0),
+          topRight: Radius.circular(20.0),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 10,
+            spreadRadius: 5,
+            offset: const Offset(0, -2),
           ),
         ],
-        onTap: (index) {
-          setState(() {
-            _currentIndex = index;
-          });
-        },
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          buildNavBarItem(Icons.home_outlined, 'Home', 0),
+          buildNavBarItem(Icons.shopping_cart_outlined, 'Orders', 1),
+          buildNavBarItem(Icons.card_giftcard_outlined, 'Gift Card', 2),
+          buildNavBarItem(Icons.person_outline, 'Profile', 3),
+        ],
       ),
     );
   }
-}
 
-class HomeContent extends StatelessWidget {
-  final List<Product> products = [
-    Product(
-      name: 'Espresso',
-      price: 2.99,
-      imageUrl: 'assets/images/espresso.png',
-    ),
-    Product(
-      name: 'Cappuccino',
-      price: 3.49,
-      imageUrl: 'assets/images/cappuccino.png',
-    ),
-    Product(
-      name: 'Latte',
-      price: 3.99,
-      imageUrl: 'assets/images/latte.png',
-    ),
-    Product(
-      name: 'Mocha',
-      price: 4.29,
-      imageUrl: 'assets/images/mocha.png',
-    ),
-    Product(
-      name: 'Macchiato',
-      price: 3.79,
-      imageUrl: 'assets/images/macchiato.png',
-    ),
-    Product(
-      name: 'Americano',
-      price: 2.89,
-      imageUrl: 'assets/images/americano.png',
-    ),
-  ];
+  Widget buildNavBarItem(IconData icon, String label, int index) {
+    bool isActive = selectedIndex == index;
+    return GestureDetector(
+      onTap: () => setState(() => selectedIndex = index),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(icon, color: isActive ? const Color(0xFFC52127) : Colors.grey),
+          const SizedBox(height: 5),
+          Text(
+            label,
+            style: TextStyle(
+              color: isActive ? const Color(0xFFC52127) : Colors.grey,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
-  @override
-  Widget build(BuildContext context) {
+  /// Home Page with Filters and Product Display
+  Widget buildHomePage() {
     return SafeArea(
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Good Morning, Jane',
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                        ),
-                      ),
-                      SizedBox(height: 4),
-                      Text(
-                        'Search for beverages or foods',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.notifications_outlined,
+                children: const [
+                  Text(
+                    'Good Morning, Jane',
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.bold,
                       color: Colors.black87,
                     ),
-                    onPressed: () {
-                      // Notification logic
-                    },
                   ),
+                  Icon(Icons.notifications_outlined, color: Colors.black87),
                 ],
               ),
             ),
-            // Search Bar
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: TextField(
-                decoration: InputDecoration(
-                  prefixIcon: const Icon(Icons.search),
-                  hintText: 'Search beverages or foods',
-                  filled: true,
-                  fillColor: Colors.grey[200],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12.0),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
+            // Filters
+            SizedBox(
+              height: 40,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: filters.length,
+                itemBuilder: (context, index) {
+                  bool isActive = selectedFilter == index;
+                  return GestureDetector(
+                    onTap: () => setState(() => selectedFilter = index),
+                    child: Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 8.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      decoration: BoxDecoration(
+                        color: isActive
+                            ? const Color(0xFFC52127)
+                            : Colors.grey[200],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        filters[index]['name']!,
+                        style: TextStyle(
+                          color: isActive ? Colors.white : Colors.black87,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 20),
-            // Promo Banner
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 16.0),
-              padding: const EdgeInsets.all(16.0),
-              decoration: BoxDecoration(
-                color: const Color(0xFFC52127),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Special Offer: Buy 1 Get 1 FREE!',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      // Handle promo action
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 10, vertical: 5),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    child: const Text(
-                      'Order Now',
-                      style: TextStyle(
-                        color: Color(0xFFC52127),
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-            // Product Section
+            // Horizontal Products
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: const Text(
@@ -217,30 +204,99 @@ class HomeContent extends StatelessWidget {
                 ),
               ),
             ),
+            const SizedBox(height: 10),
+            SizedBox(
+              height: 180,
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                itemCount: filteredProducts.length,
+                itemBuilder: (context, index) {
+                  final product = filteredProducts[index];
+                  return buildProductCard(product);
+                },
+              ),
+            ),
             const SizedBox(height: 20),
-            GridView.builder(
+            // Vertical Products
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0),
+              child: const Text(
+                'Explore More',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ListView.builder(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(0.0),
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-                childAspectRatio: 0.8,
-              ),
-              itemCount: products.length,
+              itemCount: filteredProducts.length,
               itemBuilder: (context, index) {
-                final product = products[index];
-                return ProductCard(
-                  product: product,
-                  onAddToCart: () {
-                    print('${product.name} added to cart');
-                  },
-                );
+                final product = filteredProducts[index];
+                return buildProductCard(product, vertical: true);
               },
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Product Card
+  Widget buildProductCard(Map<String, dynamic> product,
+      {bool vertical = false}) {
+    return Container(
+      margin: const EdgeInsets.all(8.0),
+      padding: const EdgeInsets.all(16.0),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black12,
+            blurRadius: 5,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        crossAxisAlignment:
+            vertical ? CrossAxisAlignment.start : CrossAxisAlignment.center,
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: Image.network(
+              product['imageUrl'],
+              width: vertical ? 80 : 100,
+              height: vertical ? 80 : 100,
+              fit: BoxFit.cover,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                product['name'],
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                '\$${product['price']}',
+                style: const TextStyle(
+                  fontSize: 16,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

@@ -10,11 +10,15 @@ class StartScreen extends StatefulWidget {
 
 class _StartScreenState extends State<StartScreen> {
   int _currentSlide = 0; // Track the current slide index
+  final CarouselController _carouselController =
+      CarouselController(); // Carousel controller
+
   final List<String> images = [
     'assets/images/start1.png', // Replace with your actual image paths
     'assets/images/start2.png',
     'assets/images/start3.png',
   ];
+
   final List<String> descriptions = [
     "BISOU : L'ambiance chaleureuse et élégante de nos cafés parisiens vous accueille pour une expérience unique.",
     "Découvrez l'art et la créativité qui définissent BISOU, un lieu où la culture et le café se rencontrent.",
@@ -28,15 +32,20 @@ class _StartScreenState extends State<StartScreen> {
         children: [
           // Background Carousel
           CarouselSlider.builder(
+            carouselController: _carouselController,
             itemCount: images.length,
             options: CarouselOptions(
               height: double.infinity,
               viewportFraction: 1.0,
+              enableInfiniteScroll: false, // Disable infinite scrolling
               onPageChanged: (index, reason) {
                 setState(() {
                   _currentSlide = index;
                 });
               },
+              scrollPhysics: _currentSlide == images.length
+                  ? const NeverScrollableScrollPhysics() // Disable swiping on the last slide
+                  : const BouncingScrollPhysics(), // Allow swiping otherwise
             ),
             itemBuilder: (context, index, realIndex) {
               return Stack(
@@ -47,8 +56,7 @@ class _StartScreenState extends State<StartScreen> {
                     fit: BoxFit.cover,
                   ),
                   Container(
-                    color: Colors.black
-                        .withOpacity(0.5), // Add a translucent overlay
+                    color: Colors.black.withOpacity(0.5), // Translucent overlay
                   ),
                   Center(
                     child: Padding(
@@ -68,7 +76,6 @@ class _StartScreenState extends State<StartScreen> {
               );
             },
           ),
-
           // Next button on the last slide
           if (_currentSlide == images.length - 1)
             Align(
@@ -78,9 +85,9 @@ class _StartScreenState extends State<StartScreen> {
                 child: ElevatedButton(
                   onPressed: () => Navigator.pushNamed(context, '/login'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC52127),
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
+                    backgroundColor: const Color.fromARGB(255, 120, 26, 29),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 50, vertical: 5),
                   ),
                   child: const Text(
                     "Get Started",
@@ -92,7 +99,6 @@ class _StartScreenState extends State<StartScreen> {
                 ),
               ),
             ),
-
           // Dots indicator
           Align(
             alignment: Alignment.bottomCenter,
@@ -102,9 +108,7 @@ class _StartScreenState extends State<StartScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: images.asMap().entries.map((entry) {
                   return GestureDetector(
-                    onTap: () => setState(() {
-                      _currentSlide = entry.key;
-                    }),
+                    onTap: () => _carouselController.animateToPage(entry.key),
                     child: Container(
                       width: 12.0,
                       height: 12.0,

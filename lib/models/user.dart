@@ -1,19 +1,31 @@
 class User {
-  final String name;
+  final String? firstname;
+  final String? lastname;
+  final String? phoneNumber;
+  final DateTime? birthDate;
+  final String password;
   final String email;
-  final String role;
-  final String token;
+  final String? role;
+  final String? token;
 
   User({
-    required this.name,
+    this.firstname,
+    this.lastname,
+    this.phoneNumber,
+    this.birthDate,
+    required this.password,
     required this.email,
-    required this.role,
-    required this.token,
+    this.role,
+    this.token,
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      name: json['name'],
+      firstname: json['firstname'],
+      lastname: json['lastname'],
+      phoneNumber: json['phoneNumber'],
+      birthDate: DateTime.parse(json['birthDate']),
+      password: json['password'],
       email: json['email'],
       role: json['role'],
       token: json['token'],

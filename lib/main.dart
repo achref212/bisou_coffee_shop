@@ -7,7 +7,6 @@ import 'screens/login_screen.dart';
 import 'screens/signup_screen.dart';
 import 'screens/home_screen.dart';
 import 'screens/admin_dashboard.dart';
-import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 void main() {
